@@ -27,6 +27,8 @@ String[] menuLabels = {"Save","Clear All Frames","Previous Frame","Next Frame","
 String message = "";
 final int GREEN = 0xFFA6CE91;
 
+int now,delay = 200;
+
 void setup(){
   frames.add(new int[8][8]);
   canvas = frames.get(0);
@@ -56,13 +58,17 @@ void setup(){
   size(bg.width,bg.height);
   frame.setTitle("DIY Gamer - Animator"); 
   textFont(loadFont("Arial-BoldMT-12.vlw"),12);
+  now = millis();
 }
 void draw(){
   drawMenu();
   //playback -> update frames
   if (autoUpdate && totalFrames > 1) {
-    currentFrame = ((currentFrame+1)%(totalFrames-1));
-    canvas = frames.get(currentFrame);
+    if(millis() - now >= delay){
+      currentFrame = ((currentFrame+1)%(totalFrames-1));
+      canvas = frames.get(currentFrame);
+      now = millis();
+    }
   }
   //draw -> update current frame pixels
   if(mousePressed && ((mouseX >= offx && mouseX <= offx + (w*s))
@@ -82,6 +88,7 @@ void draw(){
     }
   }
   drawOverlays();
+  frame.setTitle((int)frameRate+" fps");
 }
 void drawMenu(){
   image(bg,0,0);
@@ -137,6 +144,8 @@ void keyReleased(){
   if(key == 'n') clear();
   if(key == ' ') autoUpdate = !autoUpdate;
   if(key == 'e') eraseMode = !eraseMode;
+  if(key == 's') saveAnimation();
+  if(key == 'l') loadAnimation();
 }
 void mouseReleased(){
   int menuIndex = isOverMenu();
@@ -220,7 +229,7 @@ void copyToClipboard(){
   StringSelection stringSelection = new StringSelection (getCode());
   Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
   clpbrd.setContents (stringSelection, null);
-  javax.swing.JOptionPane.showMessageDialog(frame, "Your animation code is now copied!");
+  javax.swing.JOptionPane.showMessageDialog(frame, "Your code is now copied to your clipboard!");
 }
 int isOverMenu(){
   int index = -1;
@@ -232,4 +241,44 @@ int isOverMenu(){
        }
   }
   return index;
+}
+void saveAnimation(){
+  String name = (String)javax.swing.JOptionPane.showInputDialog(frame, "name your creation", "Save Gamer animation on computer", javax.swing.JOptionPane.PLAIN_MESSAGE);
+  if(name != null) {
+    String csv = "";
+    int npx = w * h;
+    for(int[][] f : frames){
+      for(int i = 0 ; i < npx ; i++){
+        int x = i%w;
+        int y = i/w;
+        csv += f[x][y];
+        if(i < npx-1) csv += ",";
+      }
+      csv += "\n";
+    }
+    saveStrings(name,csv.split("\n"));
+  }
+}
+void loadAnimation(){
+  String name = (String)javax.swing.JOptionPane.showInputDialog(frame, "re-edit your creation", "Load Gamer animation on computer", javax.swing.JOptionPane.PLAIN_MESSAGE);
+  if(name != null) {
+    try{
+      String[] csv = loadStrings(name);
+      frames.clear();
+      for(int i = 0 ; i < csv.length; i++){
+        int[][] f = new int[w][h];
+        String[] px = csv[i].split(",");
+        for(int j = 0; j < px.length; j++){
+          int x = j%w;
+          int y = j/w;
+          f[x][y] = Integer.parseInt(px[j]);
+        }
+        frames.add(f);
+      }
+      totalFrames = frames.size();
+      canvas = frames.get(0);
+    }catch(Exception e){
+      javax.swing.JOptionPane.showMessageDialog(frame, "Unfortunately there were errors loading your file!\nPlease check if the file exists and is formatted correctly");
+    }
+  }
 }
