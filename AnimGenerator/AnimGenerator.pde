@@ -73,7 +73,7 @@ void draw(){
   //playback -> update frames
   if (autoUpdate && totalFrames > 1) {
     if(millis() - now >= delay){
-      currentFrame = ((currentFrame+1)%(totalFrames-1));
+      currentFrame = ((currentFrame+1)%(totalFrames));
       canvas = frames.get(currentFrame);
       now = millis();
     }
