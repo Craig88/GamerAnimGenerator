@@ -7,7 +7,7 @@ import java.awt.event.KeyEvent;
 int currentFrame = 0;
 int totalFrames = 1;
 int s = 60;
-int offx = 80;
+int offx = 124;
 int offy = 160;
 int w = 8;
 int h = 8;
@@ -18,42 +18,50 @@ boolean[] keys = new boolean[526];
 
 boolean eraseMode;
 PImage bg;
-PImage[] menu = new PImage[20];
+PImage[] menu = new PImage[26];
 int mx = 164;//menu x offset
 int my = 25;//menu y offset
 int ms = 32;//menu item size
 int pad = 4;//menu item padding
-String[] menuLabels = {"Save","Clear All Frames","Previous Frame","Next Frame","Add Blank Frame","Duplicate Current Frame","Remove Frame","Toggle Erase","Toggle Playback"};
+String[] menuLabels = {"Copy Code","Clear All Frames","Previous Frame","Next Frame","Add Blank Frame","Duplicate Current Frame","Remove Frame","Paint Mode","Erase Mode","Toggle Playback","Save Animation","Load Animation"};
 String message = "";
 final int GREEN = 0xFFA6CE91;
 
-int now,delay = 200;
+int now,delay = 200;//200ms delay, same as Gamer library Animation example
+Slider animDelay = new Slider("delay",offx,109,243,33,16,300,200);
 
 void setup(){
   frames.add(new int[8][8]);
   canvas = frames.get(0);
-  
-  bg = loadImage("Gamer_animator_background.png");
-  menu[0] = loadImage("save_s1.png");
-  menu[1] = loadImage("x_s1.png");
-  menu[2] = loadImage("left_s1.png");
-  menu[3] = loadImage("right_s1.png");
-  menu[4] = loadImage("+_s1.png");
-  menu[5] = loadImage("duplicate_s1.png");
-  menu[6] = loadImage("-_s1.png");
-  menu[7] = loadImage("erase_square_s1.png");
-  menu[8] = loadImage("play_s1.png");
-  menu[9] = loadImage("save_s2.png");
-  menu[10] = loadImage("x_s2.png");
-  menu[11] = loadImage("left_s2.png");
-  menu[12] = loadImage("right_s2.png");
-  menu[13] = loadImage("+_s2.png");
-  menu[14] = loadImage("duplicate_s2.png");
-  menu[15] = loadImage("-_s2.png");
-  menu[16] = loadImage("erase_square_s2.png");
-  menu[17] = loadImage("play_s2.png");
-  menu[18] = loadImage("erase_square_s3.png");
-  menu[19] = loadImage("erase_square_s4.png");
+   
+  bg       = loadImage("Gamer_animator_background.png");
+  menu[0 ] = loadImage("copycode_s1.png");
+  menu[1 ] = loadImage("copycode_s2.png");
+  menu[2 ] = loadImage("x_s1.png");
+  menu[3 ] = loadImage("x_s2.png");
+  menu[4 ] = loadImage("left_s1.png");
+  menu[5 ] = loadImage("left_s2.png");
+  menu[6 ] = loadImage("right_s1.png");
+  menu[7 ] = loadImage("right_s2.png");
+  menu[8 ] = loadImage("+_s1.png");
+  menu[9 ] = loadImage("+_s2.png");
+  menu[10] = loadImage("duplicate_s1.png");
+  menu[11] = loadImage("duplicate_s2.png");
+  menu[12] = loadImage("-_s1.png");
+  menu[13] = loadImage("-_s2.png");
+  menu[14] = loadImage("paint_s1.png");
+  menu[15] = loadImage("paint_s2.png");
+  menu[16] = loadImage("erase_s1.png");
+  menu[17] = loadImage("erase_s2.png");
+  menu[18] = loadImage("play_s1.png");
+  menu[19] = loadImage("play_s2.png");
+  menu[20] = loadImage("save_s1.png");
+  menu[21] = loadImage("save_s2.png");
+  menu[22] = loadImage("load_s1.png");
+  menu[23] = loadImage("load_s2.png");
+  menu[24] = loadImage("pause_s1.png");
+  menu[25] = loadImage("pause_s2.png");
+  animDelay.bg = GREEN;
   
   size(bg.width,bg.height);
   frame.setTitle("DIY Gamer - Animator"); 
@@ -87,34 +95,37 @@ void draw(){
       rect(x*s+offx,y*s+offy,s,s);
     }
   }
-  drawOverlays();
-  frame.setTitle((int)frameRate+" fps");
+  drawOverlays(); 
 }
 void drawMenu(){
   image(bg,0,0);
   for(int i = 0 ; i < menuLabels.length; i++){
-    image(menu[i],mx+((ms+pad)*i),my);
+    image(menu[i*2],mx+((ms+pad)*i),my);
   }
-  if(eraseMode) image(menu[18],mx+((ms+pad)*7),my);
-  if(autoUpdate) image(menu[17],mx+((ms+pad)*8),my);
+  if(eraseMode) image(menu[17],mx+((ms+pad)*8),my);
+  else          image(menu[15],mx+((ms+pad)*7),my); 
+  if(autoUpdate) image(menu[24],mx+((ms+pad)*9),my);
   int menuIndex = isOverMenu();
   if(menuIndex >= 0){
     message = menuLabels[menuIndex];
-    image(menu[menuIndex+menuLabels.length],mx+((ms+pad)*menuIndex),my);
-    if(eraseMode) image(menu[19],mx+((ms+pad)*7),my);
-    if(autoUpdate) image(menu[8],mx+((ms+pad)*8),my);
+    image(menu[menuIndex*2+1],mx+((ms+pad)*menuIndex),my);
+    if(eraseMode) image(menu[16],mx+((ms+pad)*8),my);
+    else          image(menu[14],mx+((ms+pad)*7),my);
+    if(autoUpdate) image(menu[25],mx+((ms+pad)*9),my);
   }else message = "";  
+  animDelay.update(mouseX,mouseY,mousePressed);
+  animDelay.draw();
+  delay = (int)animDelay.value;
 }
 void drawOverlays(){
   pushStyle();//draw frame number
     noStroke();
     String cf = (currentFrame+1) + " of " + totalFrames;
-    rectMode(CENTER);
+    rectMode(CORNER);
     fill(GREEN);
-    rect(540,125,60,33);
-    //rect(500,125,121,33);
+    rect(540,109,80,33);
     fill(0);
-    text(cf,500,125);
+    text(cf,560,130);
   popStyle();
   fill(0);//draw tool tip around menu
   text(message,mouseX,mouseY-20);
@@ -135,13 +146,13 @@ void keyPressed(){
 }
 void keyReleased(){
   keys[keyCode] = false;
-  if(key == 'c') copyToClipboard();
+  if(key == 'C') copyToClipboard();
   if(key == BACKSPACE) clearFrame();
   if(key == 'i') invertFrame();
   if(key == '=') addFrame();
   if(key == '+') cloneFrame();
   if(key == '-') removeFrame();
-  if(key == 'n') clear();
+  if(key == 'x') clear();
   if(key == ' ') autoUpdate = !autoUpdate;
   if(key == 'e') eraseMode = !eraseMode;
   if(key == 's') saveAnimation();
@@ -157,8 +168,11 @@ void mouseReleased(){
   if(menuIndex == 4) addFrame();
   if(menuIndex == 5) cloneFrame();
   if(menuIndex == 6) removeFrame();
-  if(menuIndex == 7) eraseMode = !eraseMode;
-  if(menuIndex == 8) autoUpdate = !autoUpdate;
+  if(menuIndex == 7) eraseMode = false;
+  if(menuIndex == 8) eraseMode = true;
+  if(menuIndex == 9) autoUpdate = !autoUpdate;
+  if(menuIndex == 10) saveAnimation();
+  if(menuIndex == 11) loadAnimation();
 }
 boolean checkKey(int k) {
   if (keys.length >= k) return keys[k];  
@@ -262,23 +276,71 @@ void saveAnimation(){
 void loadAnimation(){
   String name = (String)javax.swing.JOptionPane.showInputDialog(frame, "re-edit your creation", "Load Gamer animation on computer", javax.swing.JOptionPane.PLAIN_MESSAGE);
   if(name != null) {
-    try{
-      String[] csv = loadStrings(name);
-      frames.clear();
-      for(int i = 0 ; i < csv.length; i++){
-        int[][] f = new int[w][h];
-        String[] px = csv[i].split(",");
-        for(int j = 0; j < px.length; j++){
-          int x = j%w;
-          int y = j/w;
-          f[x][y] = Integer.parseInt(px[j]);
+    String[] csv = loadStrings(name);
+    if(csv != null){
+      try{
+        frames.clear();
+        for(int i = 0 ; i < csv.length; i++){
+          int[][] f = new int[w][h];
+          String[] px = csv[i].split(",");
+          for(int j = 0; j < px.length; j++){
+            int x = j%w;
+            int y = j/w;
+            f[x][y] = Integer.parseInt(px[j]);
+          }
+          frames.add(f);
         }
-        frames.add(f);
+        totalFrames = frames.size();
+        canvas = frames.get(0);
+      }catch(Exception e){
+        loadError();
       }
-      totalFrames = frames.size();
-      canvas = frames.get(0);
-    }catch(Exception e){
-      javax.swing.JOptionPane.showMessageDialog(frame, "Unfortunately there were errors loading your file!\nPlease check if the file exists and is formatted correctly");
+    }else loadError();
+  }
+}
+void loadError(){
+  javax.swing.JOptionPane.showMessageDialog(frame, "Unfortunately there were errors loading your file!\nPlease check if the file exists and is formatted correctly");
+}
+class Slider{
+  float w,h,x,y;//width, height and position
+  float min,max,value;//slider values: minimum, maximum and current
+  float cx,pw = 20;//current slider picker position, picker width
+  
+  color bg = color(0);//background colour
+  color fg = color(255);//foreground colour
+  
+  String label;
+  
+  Slider(String label,float x,float y,float w,float h,float min,float max,float value){
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.min = min;
+    this.max = max;
+    this.value = value;
+    this.label = label;
+    cx = map(value,min,max,x,x+w);
+  }
+  void update(int mx,int my,boolean md){
+    if(md){
+      if((mx >= x && mx <= (x+w)) &&
+         (my >= y && my <= (y+h))){
+        cx = mx;
+        value = map(cx,x,x+w,min,max);
+      }
     }
+  }
+  void draw(){
+    pushStyle();
+    noStroke();
+    fill(bg);
+    rect(x,y,w,h);
+    fill(fg);
+    rect(cx-pw*.5,y,pw,h);
+//    rect(x,y,cx-x,h);
+    fill(0);
+    text(label+": "+(int)value,x+pw,y+h*.75);
+    popStyle();
   }
 }
