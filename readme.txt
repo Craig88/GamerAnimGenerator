@@ -40,5 +40,3 @@ Credits
 Illustration by  Edward Carvalho-Monaghan 
 Interface design by Adam Shepard
 Code by George Profenza
-
-C:\Program Files\Adobe\Adobe Photoshop CS6 (64 Bit)\Presets\Scripts
