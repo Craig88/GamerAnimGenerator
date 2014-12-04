@@ -231,6 +231,14 @@ String getCode(){
   return out;
 }
 void clear(){
+  
+    int response = javax.swing.JOptionPane.showConfirmDialog(frame, "This will delete all the frames. Are you sure you want to do this?");
+  
+              if (response != javax.swing.JOptionPane.YES_OPTION )
+            {
+                return;
+            }
+  
   noLoop();
   frames.clear();
   frames.add(new int[8][8]);
